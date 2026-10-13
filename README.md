@@ -1,4 +1,5 @@
 <img width="1080" height="1080" alt="Discover, search and save your favorite movies-2" src="https://github.com/user-attachments/assets/87ac8c93-1fd8-4be3-90b3-fb796ac1bbbe" />
+
 # SEEN
 
 A movie discovery app for iOS built with SwiftUI and the TMDB API. Browse movies, search, view details, and save your favorites.
@@ -23,9 +24,10 @@ A movie discovery app for iOS built with SwiftUI and the TMDB API. Browse movies
 - Debounced search using `.task(id:)`
 - `UserDefaults` for locally saved favorites
 - Semantic system colors, so light and dark mode work out of the box
+
 ## Architecture
 
-The app uses MVVM with a small service layer, so each part of the code has one clear job.
+The app uses MVVM with a small service layer, so each part of the code has one job.
 
 ```
 MovieBox/
@@ -35,20 +37,16 @@ MovieBox/
   Views/        Screens and reusable components
 ```
 
-### Data flow
+**Data flow:** `View -> ViewModel -> MovieService -> APIClient -> TMDB`. Results come back the same way. If a request fails, `APIClient` throws an `APIError`, the view model catches it and sets `errorMessage`, and the view shows an error screen with a "Try again" button.
 
-`View -> ViewModel -> MovieService -> APIClient -> TMDB`
+### Benefits
 
-Results come back the same way. If a request fails, `APIClient` throws an `APIError`, the view model catches it and sets `errorMessage`, and the view shows an error screen with a "Try again" button.
+- **Maintainability:** each layer changes on its own. For example, if the TMDB base URL or auth header changes, only `APIClient` needs an edit, and no screen is touched.
+- **Reusability:** shared UI like `ErrorView` and `MovieCard` lives in `Views/Components`, and shared requests live in `MovieService`, so Home, Search and Favorites don't duplicate code.
+- **Testability:** view models contain no UI code, so their logic can be tested on its own.
+- **Consistent states:** every screen reads `isLoading`, `errorMessage` and its data from its view model, so loading, loaded, empty and error states behave the same way everywhere.
+- **Clear navigation:** all `NavigationStack`s and destinations are declared in `MainTabView`, one stack per tab, so changing where a screen leads means editing one file.
 
-### Design decisions
-
-- **Networking stays out of the views.** `URLSession` is used only in `APIClient`, so views never build URLs or decode JSON.
-- **One shared `APIClient`.** The base URL, auth header, status check, decoding and error mapping live in one place.
-- **State lives in the view model.** Each screen reads `isLoading`, `errorMessage` and its data, so loading, loaded, empty and error states work the same way everywhere.
-- **Shared code is reused.** Common UI is in `Views/Components` and common requests are in `MovieService`.
-- **Navigation is declared in one place.** `MainTabView` holds one `NavigationStack` per tab, and screens only use `NavigationLink(value:)`.
-- **View models have no UI code**, which keeps their logic easy to read and to test.
 ## Setup
 
 1. Get a Read Access Token from [TMDB](https://www.themoviedb.org/settings/api).
