@@ -2,10 +2,10 @@ import SwiftUI
 
 struct MovieDetailView: View {
 
-    // الفيلم اللي جاي من القائمة، عندي منه العنوان والبوستر من الحين
     let movie: Movie
     @State private var viewModel: MovieDetailViewModel
     @Environment(FavoritesStore.self) private var favorites
+    @Environment(\.dismiss) private var dismiss
 
     init(movie: Movie) {
         self.movie = movie
@@ -13,28 +13,25 @@ struct MovieDetailView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 0) {
-                poster
+        ZStack {
+            backdrop
 
-                details
-                    .padding()
-            }
-        }
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbarBackground(.hidden, for: .navigationBar)
-        .toolbarColorScheme(.dark, for: .navigationBar)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    favorites.toggle(movie)
-                } label: {
-                    Image(systemName: favorites.isFavorite(movie) ? "heart.fill" : "heart")
-                        .foregroundStyle(favorites.isFavorite(movie) ? .red : .white)
-                        .padding(8)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
+                    // مساحة فاضية عشان البوستر يبان فوق والنص ينزل تحت
+                    Color.clear.frame(height: 400)
+
+                    titleBlock
+                    details
+                        .padding(.top, 20)
                 }
+                .padding(.horizontal, 20)
+                .padding(.bottom, 30)
             }
         }
+        // الأزرار فوق الصفحة بدل الـ toolbar، عشان ما تتكرر الدوائر
+        .overlay(alignment: .top) { topButtons }
+        .toolbar(.hidden, for: .navigationBar)
         .task {
             if viewModel.detail == nil {
                 await viewModel.fetchDetail()
@@ -42,51 +39,102 @@ struct MovieDetailView: View {
         }
     }
 
-    private var poster: some View {
-        Color.clear
-            .frame(height: 480)
-            .overlay {
-                AsyncImage(url: viewModel.detail?.posterURL ?? movie.posterURL) { phase in
-                    if let image = phase.image {
-                        image
-                            .resizable()
-                            .scaledToFill()
-                    } else if phase.error != nil {
-                        Image(systemName: "film")
-                            .font(.largeTitle)
-                            .foregroundStyle(.secondary)
-                    } else {
-                        ProgressView()
-                    }
-                }
-            }
-            .background(Color(.secondarySystemBackground))
-            .clipped()
-            .overlay(alignment: .bottomLeading) {
-                ZStack(alignment: .bottomLeading) {
-                    LinearGradient(
-                        colors: [.clear, Color(.systemBackground)],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                    .frame(height: 200)
+    // MARK: - الخلفية: البوستر على الصفحة كلها
 
-                    Text(movie.title)
-                        .font(.title)
-                        .bold()
-                        .foregroundStyle(.primary)
-                        .padding(.horizontal)
-                        .padding(.bottom, 8)
+    private var backdrop: some View {
+        GeometryReader { geo in
+            AsyncImage(url: movie.largePosterURL) { phase in
+                if let image = phase.image {
+                    image
+                        .resizable()
+                        .scaledToFill()
+                } else if phase.error != nil {
+                    Image(systemName: "film")
+                        .font(.largeTitle)
+                        .foregroundStyle(.secondary)
+                } else {
+                    ProgressView()
                 }
             }
-            .ignoresSafeArea(edges: .top)
+            .frame(width: geo.size.width, height: geo.size.height)
+            .clipped()
+        }
+        .background(Color.black)
+        // تدرج أسود يغمّق الأسفل عشان النص يتقرا
+        .overlay {
+            LinearGradient(
+                stops: [
+                    .init(color: .black.opacity(0.1), location: 0.0),
+                    .init(color: .black.opacity(0.35), location: 0.45),
+                    .init(color: .black.opacity(0.92), location: 0.8)
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        }
+        .ignoresSafeArea()
     }
 
-    // الأربع حالات للجزء اللي ينجاب من الشبكة
+    // MARK: - الأزرار
+
+    private var topButtons: some View {
+        HStack {
+            circleButton(systemName: "chevron.left") { dismiss() }
+            Spacer()
+            circleButton(
+                systemName: favorites.isFavorite(movie) ? "heart.fill" : "heart",
+                color: favorites.isFavorite(movie) ? .red : .white
+            ) { favorites.toggle(movie) }
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 8)
+    }
+
+    private func circleButton(
+        systemName: String,
+        color: Color = .white,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            Image(systemName: systemName)
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(color)
+                .frame(width: 40, height: 40)
+                .background(.black.opacity(0.35))
+                .clipShape(Circle())
+        }
+    }
+
+    // MARK: - العنوان
+
+    private var titleBlock: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(movie.title)
+                .font(.largeTitle.bold())
+                .foregroundStyle(.white)
+                .lineLimit(3)
+
+            if let detail = viewModel.detail {
+                HStack(spacing: 8) {
+                    Text(detail.releaseYear)
+                    if !detail.runtimeText.isEmpty {
+                        Text("•")
+                        Text(detail.runtimeText)
+                    }
+                }
+                .font(.subheadline)
+                .foregroundStyle(.white.opacity(0.7))
+            }
+        }
+    }
+
+    // MARK: - الأربع حالات للجزء اللي ينجاب من الشبكة
+
     @ViewBuilder
     private var details: some View {
         if viewModel.isLoading {
             ProgressView()
+                .tint(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.top, 20)
 
@@ -97,34 +145,45 @@ struct MovieDetailView: View {
             .frame(maxWidth: .infinity)
 
         } else if let detail = viewModel.detail {
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 20) {
+
+                if !detail.genres.isEmpty {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 10) {
+                            ForEach(detail.genres) { genre in
+                                Text(genre.name)
+                                    .font(.subheadline.weight(.medium))
+                                    .foregroundStyle(.white)
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 8)
+                                    .background(.white.opacity(0.18))
+                                    .clipShape(Capsule())
+                            }
+                        }
+                    }
+                }
 
                 HStack(spacing: 8) {
-                    Text(detail.releaseYear)
                     Image(systemName: "star.fill")
                         .foregroundStyle(.yellow)
                     Text(String(format: "%.1f", detail.voteAverage))
-                    if !detail.runtimeText.isEmpty {
-                        Text(detail.runtimeText)
+                        .font(.title3.bold())
+                        .foregroundStyle(.white)
+                    if !detail.reviewsText.isEmpty {
+                        Text("(\(detail.reviewsText))")
+                            .font(.subheadline)
+                            .foregroundStyle(.white.opacity(0.7))
                     }
                 }
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
 
-                if !detail.genres.isEmpty {
-                    Text(detail.genres.map(\.name).joined(separator: ", "))
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Overview")
+                        .font(.title3.bold())
+                        .foregroundStyle(.white)
 
-                Text("Overview")
-                    .font(.headline)
-
-                if detail.overview.isEmpty {
-                    Text("No overview available.")
-                        .foregroundStyle(.secondary)
-                } else {
-                    Text(detail.overview)
+                    Text(detail.overview.isEmpty ? "No overview available." : detail.overview)
+                        .foregroundStyle(.white.opacity(0.8))
+                        .lineSpacing(4)
                 }
             }
         }

@@ -3,6 +3,9 @@ import SwiftUI
 struct MovieCard: View {
     let movie: Movie
 
+    @State private var image: UIImage?
+    @State private var failed = false
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             poster
@@ -33,34 +36,36 @@ struct MovieCard: View {
         Color(.tertiarySystemBackground)
             .aspectRatio(2/3, contentMode: .fit)
             .overlay {
-                if movie.posterURL == nil {
-                    // الفيلم ما له بوستر
+                if let image {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFill()
+                } else if movie.posterURL == nil || failed {
+                    // الفيلم ما له بوستر أو فشل التحميل
                     Image(systemName: "film")
                         .font(.title)
                         .foregroundStyle(.secondary)
                 } else {
-                    AsyncImage(url: movie.posterURL) { phase in
-                        switch phase {
-                        case .success(let image):
-                            image
-                                .resizable()
-                                .scaledToFill()
-  //-----------------------------------------------------
-                        case .failure(let error):
-                            // مؤقت عشان أعرف ليش فشلت، أشيله بعدين
-                            let _ = print("Poster failed:", movie.title, error)
-                            Image(systemName: "film")
-                                .font(.title)
-                                .foregroundStyle(.secondary)
-//-----------------------------------------------------
-
-                        default:
-                            ProgressView()
-                        }
-                    }
+                    ProgressView()
                 }
             }
             .clipped()
+            .task(id: movie.posterURL) {
+                await loadPoster()
+            }
+    }
+
+     // نطلب الصورة من APIClient، وهو اللي يعيد المحاولة 3 مرات
+    private func loadPoster() async {
+        guard let url = movie.posterURL else { return }
+        failed = false
+
+        if let data = await APIClient().loadImageData(from: url),
+           let loaded = UIImage(data: data) {
+            image = loaded
+        } else if !Task.isCancelled {
+            failed = true
+        }
     }
 }
 #Preview {

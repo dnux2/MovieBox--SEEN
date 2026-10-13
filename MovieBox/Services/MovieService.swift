@@ -5,7 +5,7 @@ import Foundation
 struct MovieService {
     private let client: APIClient
 
-    init(client: APIClient = APIClient()) {
+    init(client: APIClient = .shared) {
         self.client = client
     }
 
@@ -27,5 +27,24 @@ struct MovieService {
     // تفاصيل فيلم واحد، لصفحة Detail
     func movieDetail(id: Int) async throws -> MovieDetail {
         try await client.get("/movie/\(id)")
+    }
+    
+    func trendingMovies(page: Int = 1) async throws -> MovieListResponse {
+        try await client.get("/trending/movie/week", queryItems: [
+            URLQueryItem(name: "page", value: String(page))
+        ])
+    }
+
+    func nowPlayingMovies(page: Int = 1) async throws -> MovieListResponse {
+        try await client.get("/movie/now_playing", queryItems: [
+            URLQueryItem(name: "page", value: String(page))
+        ])
+    }
+
+    // الأعلى تقييم، سكشن Top Rated
+    func topRatedMovies(page: Int = 1) async throws -> MovieListResponse {
+        try await client.get("/movie/top_rated", queryItems: [
+            URLQueryItem(name: "page", value: String(page))
+        ])
     }
 }

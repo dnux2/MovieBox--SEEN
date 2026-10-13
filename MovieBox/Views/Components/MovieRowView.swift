@@ -28,11 +28,16 @@ struct MovieRowView: View {
                     .foregroundStyle(.primary)
                     .lineLimit(2)
 
-                if !movie.releaseYear.isEmpty {
-                    Text(movie.releaseYear)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                HStack(spacing: 6) {
+                    Image(systemName: "star.fill")
+                        .foregroundStyle(.yellow)
+                    Text(String(format: "%.1f", movie.voteAverage))
+                    if !movie.releaseYear.isEmpty {
+                        Text("· \(movie.releaseYear)")
+                    }
                 }
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
             }
 
             Spacer()

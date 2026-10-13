@@ -13,6 +13,11 @@ struct Movie: Codable, Identifiable, Hashable {
         guard let posterPath else { return nil }
         return URL(string: "https://image.tmdb.org/t/p/w342\(posterPath)")
     }
+    // نسخة أكبر للبوستر، للكارد الكبير في الهوم
+    var largePosterURL: URL? {
+        guard let posterPath else { return nil }
+        return URL(string: "https://image.tmdb.org/t/p/w780\(posterPath)")
+    }
 //اخذ سنه الاصدار فقط من التاريخ بدون الشهر واليوم
 //كمان لو كانت nil مايطلع لي مشكله
     var releaseYear: String {

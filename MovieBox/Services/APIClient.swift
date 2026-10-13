@@ -2,11 +2,18 @@ import Foundation
 
 // هذا الكلاس الوحيد اللي يكلم URLSession في التطبيق كله
 // كل الشاشات تمر من هنا، ما أكرر الكود في كل مكان
-struct APIClient {
+
+// why Class لان نوعه refrence type كل النسخ تاشر على كائن  واحد
+// الstruct نوعه value type فكل نسخه تسويلها نسخه
+// why final لانه نسخه نهائيه مابي اسوي لها وراثه
+
+final class APIClient {
+    //why static لو ناديتها مايحتاج اسوي اوبجكت
+    static let shared = APIClient()
     private let baseURL = "https://api.themoviedb.org/3"
     private let session: URLSession
     private let decoder: JSONDecoder
-
+// why not private لسهوله الاختبار
     init(session: URLSession = .shared) {
         self.session = session
 
@@ -63,5 +70,28 @@ struct APIClient {
         } catch {
             throw APIError.decodingFailed
         }
+    }
+
+    // تحميل بيانات الصورة (البوستر)، ولو فشل يعيد المحاولة 3 مرات
+    func loadImageData(from url: URL) async -> Data? {
+        // لو الصورة نزلت قبل، نرجعها على طول بدون طلب جديد
+        if let cached = Self.imageCache.object(forKey: url as NSURL) {
+            return cached as Data
+        }
+
+        for _ in 1...3 {
+            if Task.isCancelled { return nil }
+            do {
+                let (data, _) = try await session.data(from: url)
+                Self.imageCache.setObject(data as NSData, forKey: url as NSURL)
+                return data
+            } catch {
+                // مؤقت للتشخيص، أشيله بعدين
+                //print("Image failed:", url.lastPathComponent, error)
+            }
+            // ننتظر شوي قبل المحاولة الجاية
+            try? await Task.sleep(for: .milliseconds(500))
+        }
+        return nil
     }
 }
