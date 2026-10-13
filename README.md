@@ -8,29 +8,29 @@ A movie discovery app for iOS built with SwiftUI and the TMDB API. Browse trendi
 
 ## Key Features
 
-•⁠  ⁠*Trending Movies:* Responsive grid with pull-to-refresh and infinite pagination.
-•⁠  ⁠*Instant Search:* Debounced search queries with built-in empty and no-results states.
-•⁠  ⁠*Detailed Insights:* Complete movie detail view.
-•⁠  ⁠*Local Favorites:* Save favorite movies locally for offline access.
-•⁠  ⁠*State Handling:* Dedicated UI states for Loading, Loaded, Empty, and Errors (offline-ready).
-•⁠  ⁠*Adaptive UI:* Native support for Dark and Light modes using semantic system colors.
+- **Trending Movies:** Responsive grid with pull-to-refresh and infinite pagination.
+- **Instant Search:** Debounced search queries with built-in empty and no-results states.
+- **Detailed Insights:** Complete movie detail view.
+- **Local Favorites:** Save favorite movies locally for offline access.
+- **State Handling:** Dedicated UI states for Loading, Loaded, Empty, and Errors (offline-ready).
+- **Adaptive UI:** Native support for Dark and Light modes using semantic system colors.
 
 ---
 
 ## Tech Stack
 
-•⁠  ⁠*Framework:* SwiftUI (iOS 17+)
-•⁠  ⁠*Architecture:* MVVM + Service Layer with ⁠ @Observable ⁠ state management
-•⁠  ⁠*Navigation:* ⁠ NavigationStack ⁠ with modern ⁠ TabView ⁠ structure
-•⁠  ⁠*Networking:* Async/await using native ⁠ URLSession ⁠ and ⁠ Codable ⁠
-•⁠  ⁠*Persistence:* ⁠ UserDefaults ⁠ for lightweight local storage
-•⁠  ⁠*Search Optimization:* ⁠ .task(id:) ⁠ for debounced API calls
+- **Framework:** SwiftUI (iOS 17+)
+- **Architecture:** MVVM + Service Layer with `@Observable` state management
+- **Navigation:** `NavigationStack` with modern `TabView` structure
+- **Networking:** Async/await using native `URLSession` and `Codable`
+- **Persistence:** `UserDefaults` for lightweight local storage
+- **Search Optimization:** `.task(id:)` for debounced API calls
 
 ---
 
 ## Project Structure
 
-
+ ⁠text
 MovieBox/
 ├── Models/       # Codable data structures (Movie, MovieDetail, etc.)
 ├── Services/     # APIClient, MovieService, FavoritesStore, Config
@@ -38,14 +38,9 @@ MovieBox/
 └── Views/        # SwiftUI screens and modular UI components
 
 Networking is kept strictly out of the views, so each screen only talks to its view model, isolating business logic within the service layer.
-
----
-
-## Setup & Installation
-
-1.⁠ ⁠Get a Read Access Token from [TMDB](https://www.themoviedb.org/settings/api).
-2.⁠ ⁠Create your local config file from the example:
-   ```bash
+Setup & Installation
+ * Get a Read Access Token from TMDB.
+ * Create your local config file from the example:
    cp Secrets.example.xcconfig Secrets.xcconfig
 
  * Add your token inside Secrets.xcconfig:
@@ -54,5 +49,5 @@ Networking is kept strictly out of the views, so each screen only talks to its v
  * Open MovieBox.xcodeproj in Xcode and build/run.
 Note: Secrets.xcconfig is ignored by Git to keep API tokens secure.
 Credits
-This product uses the TMDB API but is not endorsed or certified by TMD
+This product uses the TMDB API but is not endorsed or certified by TMDBTMD
 This product uses the TMDB API but is not endorsed or certified by TMDB.
