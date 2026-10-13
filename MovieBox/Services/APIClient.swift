@@ -13,6 +13,8 @@ final class APIClient {
     private let baseURL = "https://api.themoviedb.org/3"
     private let session: URLSession
     private let decoder: JSONDecoder
+    // why static لان كاش واحد لكل النسخ
+    private static let imageCache = NSCache<NSURL, NSData>()
 // why not private لسهوله الاختبار
     init(session: URLSession = .shared) {
         self.session = session

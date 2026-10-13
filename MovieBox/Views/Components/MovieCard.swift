@@ -60,7 +60,7 @@ struct MovieCard: View {
         guard let url = movie.posterURL else { return }
         failed = false
 
-        if let data = await APIClient().loadImageData(from: url),
+        if let data = await APIClient.shared.loadImageData(from: url),
            let loaded = UIImage(data: data) {
             image = loaded
         } else if !Task.isCancelled {
