@@ -5,7 +5,7 @@ import Foundation
 struct MovieService {
     private let client: APIClient
 
-    init(client: APIClient = APIClient()) {
+    init(client: APIClient = .shared) {
         self.client = client
     }
 

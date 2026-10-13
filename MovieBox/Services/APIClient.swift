@@ -2,11 +2,18 @@ import Foundation
 
 // هذا الكلاس الوحيد اللي يكلم URLSession في التطبيق كله
 // كل الشاشات تمر من هنا، ما أكرر الكود في كل مكان
-struct APIClient {
+
+// why Class لان نوعه refrence type كل النسخ تاشر على كائن  واحد
+// الstruct نوعه value type فكل نسخه تسويلها نسخه
+// why final لانه نسخه نهائيه مابي اسوي لها وراثه
+
+final class APIClient {
+    //why static لو ناديتها مايحتاج اسوي اوبجكت
+    static let shared = APIClient()
     private let baseURL = "https://api.themoviedb.org/3"
     private let session: URLSession
     private let decoder: JSONDecoder
-
+// why not private لسهوله الاختبار
     init(session: URLSession = .shared) {
         self.session = session
 
