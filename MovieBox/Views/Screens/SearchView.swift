@@ -5,20 +5,18 @@ struct SearchView: View {
     @State private var viewModel = SearchViewModel()
 
     var body: some View {
-        NavigationStack {
+       
             content
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background { AppBackground() }
                 .navigationTitle("Search")
-                .navigationDestination(for: Movie.self) { movie in
-                    MovieDetailView(movie: movie)
-                }
+                
                 .searchable(text: $viewModel.query, prompt: "Search movies")
                 // كل ما تغيّر النص، SwiftUI يلغي المهمة القديمة ويبدأ جديدة
                 .task(id: viewModel.query) {
                     await viewModel.search()
                 }
-        }
+        
     }
 
     // كل حالة لها شكل مختلف

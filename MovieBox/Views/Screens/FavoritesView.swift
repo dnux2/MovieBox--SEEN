@@ -7,7 +7,7 @@ struct FavoritesView: View {
     private let columns = [GridItem(.flexible()), GridItem(.flexible())]
 
     var body: some View {
-        NavigationStack {
+       
             Group {
                 if favorites.movies.isEmpty {
                     EmptyStateView(message: "No favorites yet. Tap the heart on a movie to save it.")
@@ -28,9 +28,6 @@ struct FavoritesView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background { AppBackground() }
             .navigationTitle("Favorites")
-            .navigationDestination(for: Movie.self) { movie in
-                MovieDetailView(movie: movie)
-            }
-        }
+                    }
     }
-}
+

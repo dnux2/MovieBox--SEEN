@@ -10,22 +10,13 @@ struct HomeView: View {
 
     // لما أضغط على البحث، MainTabView يبدّل التاب
     var onSearchTap: () -> Void
-
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 0) {
-                header
-                content
-            }
-            .background { AppBackground() }
-            .toolbar(.hidden, for: .navigationBar)
-            .navigationDestination(for: Movie.self) { movie in
-                MovieDetailView(movie: movie)
-            }
-            .navigationDestination(for: MovieListKind.self) { kind in
-                MovieListView(kind: kind)
-            }
+        VStack(spacing: 0) {
+            header
+            content
         }
+        .background { AppBackground() }
+        .toolbar(.hidden, for: .navigationBar)
         .task {
             // ما أحمّل من جديد لو عندي أفلام
             if viewModel.trending.movies.isEmpty {
@@ -361,6 +352,8 @@ struct HomeView: View {
 }
 
 #Preview {
-    HomeView(onSearchTap: {})
-        .environment(FavoritesStore())
+    NavigationStack {
+        HomeView(onSearchTap: {})
+    }
+    .environment(FavoritesStore())
 }

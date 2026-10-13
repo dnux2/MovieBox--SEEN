@@ -8,18 +8,38 @@ struct MainTabView: View {
     @State private var selectedTab: AppTab = .home
 
     var body: some View {
-        TabView(selection: $selectedTab) {
-            HomeView(onSearchTap: { selectedTab = .search })
-                .tabItem { Label("Home", systemImage: "house") }
-                .tag(AppTab.home)
+        TabView(selection: $selectedTab){
+        // خاص للهوم
+            NavigationStack {
+                HomeView(onSearchTap: { selectedTab = .search })
+                    .navigationDestination(for: Movie.self) { movie in
+                        MovieDetailView(movie: movie)
+                    }
+                    .navigationDestination(for: MovieListKind.self) { kind in
+                        MovieListView(kind: kind)
+                    }
+            }
+            .tabItem { Label("Home", systemImage: "house") }
+            .tag(AppTab.home)
+            //خاص بالسيرش
+            NavigationStack {
+                SearchView()
+                    .navigationDestination(for: Movie.self) { movie in
+                        MovieDetailView(movie: movie)
+                    }
+            }
+            .tabItem { Label("Search", systemImage: "magnifyingglass") }
+            .tag(AppTab.search)
 
-            SearchView()
-                .tabItem { Label("Search", systemImage: "magnifyingglass") }
-                .tag(AppTab.search)
-
-            FavoritesView()
-                .tabItem { Label("Favorites", systemImage: "heart") }
+            NavigationStack{
+                FavoritesView()
+                    .navigationDestination(for: Movie.self) { movie in
+                        MovieDetailView(movie: movie)
+                    }
+            
+            }.tabItem { Label("Favorites", systemImage: "heart") }
                 .tag(AppTab.favorites)
+            
         }
     }
 }
