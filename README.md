@@ -1,50 +1,65 @@
 <img width="1080" height="1080" alt="Discover, search and save your favorite movies-2" src="https://github.com/user-attachments/assets/87ac8c93-1fd8-4be3-90b3-fb796ac1bbbe" />
 # SEEN
 
-A movie discovery app for iOS built with SwiftUI and the TMDB API. Browse popular movies, search with debounce, view details, and save your favorites.
+A movie discovery app for iOS built with SwiftUI and the TMDB API. Browse movies, search, view details, and save your favorites.
 
 ## Features
 
-•⁠  ⁠Home grid of popular movies with pull-to-refresh and infinite scroll
-•⁠  ⁠Movie details screen
-•⁠  ⁠Search with debounce, plus empty and no-results states
-•⁠  ⁠Favorites saved locally on the device
-•⁠  ⁠Clear loading, error and empty states (try it in airplane mode)
-•⁠  ⁠Light and dark mode support
+- Home with Trending, Now Playing and Top Rated sections, plus "See All" lists with infinite scroll
+- Pull-to-refresh
+- Movie details screen
+- Search with debounce, plus empty and no-results states
+- Favorites saved locally on the device
+- Clear loading, error and empty states (try it in airplane mode)
+- Light and dark mode support
 
 ## Tech
 
-•⁠  ⁠SwiftUI, iOS 17+
-•⁠  ⁠⁠ NavigationStack ⁠ (one per tab) with a ⁠ TabView ⁠ for Home / Search / Favorites
-•⁠  ⁠async/await networking with ⁠ URLSession ⁠, through a single shared ⁠ APIClient ⁠
-•⁠  ⁠⁠ Codable ⁠ models matching the TMDB JSON
-•⁠  ⁠⁠ @Observable ⁠ view models that expose loading / loaded / empty / error states
-•⁠  ⁠Debounced search using ⁠ .task(id:) ⁠
-•⁠  ⁠⁠ UserDefaults ⁠ for locally saved favorites
-•⁠  ⁠Semantic system colors, so light and dark mode work out of the box
+- SwiftUI, iOS 17+
+- `TabView` for Home / Search / Favorites, with one `NavigationStack` per tab
+- async/await networking with `URLSession`, through a single shared `APIClient`
+- `Codable` models matching the TMDB JSON
+- `@Observable` view models that expose loading / loaded / empty / error states
+- Debounced search using `.task(id:)`
+- `UserDefaults` for locally saved favorites
+- Semantic system colors, so light and dark mode work out of the box
 
-## Project structure
+## Architecture
 
+The app follows MVVM, with a small service layer for networking.
 
+```
 MovieBox/
-  Models/       Codable models (Movie, MovieDetail, ...)
+  Models/       Codable models (Movie, MovieDetail, Genre, ...)
   Services/     APIClient, MovieService, FavoritesStore, Config
-  ViewModels/   Screen logic and state (loading / loaded / empty / error)
+  ViewModels/   Screen logic and state
   Views/        Screens and reusable components
+```
 
+**Data flow:** `View -> ViewModel -> MovieService -> APIClient -> TMDB`, and the result comes back the same way. If a request fails, `APIClient` throws an `APIError`, the view model catches it and sets `errorMessage`, and the view shows an error screen with a "Try again" button.
 
-Networking is kept out of the views, so each screen only talks to its view model.
+### Why this structure?
+
+- **Separation of concerns:** each layer has one job (data, UI, screen state, networking), so changing one layer doesn't force changes in the others.
+- **Networking is kept out of the views:** `URLSession` is used only inside `APIClient`. Views never build URLs or decode JSON.
+- **One shared `APIClient`:** the base URL, token header, status-code check, decoding and error mapping live in one place, so an API change means fixing one file.
+- **Four states on every screen:** the state lives in the view model (`isLoading`, `errorMessage`, data), so every screen handles loading, loaded, empty and error the same way, and failures show in the UI, not only in the console.
+- **Less repeated code:** shared UI lives in `Views/Components` and shared requests live in `MovieService`, so Home, Search and Favorites don't copy code from each other.
+- **Navigation in one place:** all `NavigationStack`s and destinations are declared in `MainTabView`. Screens only use `NavigationLink(value:)`, and each tab keeps its own back history.
+- **Testable logic:** view models are plain classes with no UI code, so their logic can be tested without running the interface.
 
 ## Setup
 
-1.⁠ ⁠Get a Read Access Token from [TMDB](https://www.themoviedb.org/settings/api).
-2.⁠ ⁠Copy ⁠ Secrets.example.xcconfig ⁠ to ⁠ Secrets.xcconfig ⁠ and put your token in it:
+1. Get a Read Access Token from [TMDB](https://www.themoviedb.org/settings/api).
+2. Copy `Secrets.example.xcconfig` to `Secrets.xcconfig` and put your token in it:
 
+```
    TMDB_TOKEN = your_token_here
+```
 
-3.⁠ ⁠Open ⁠ MovieBox.xcodeproj ⁠ in Xcode and run.
+3. Open `MovieBox.xcodeproj` in Xcode and run.
 
-⁠ Secrets.xcconfig ⁠ is in ⁠ .gitignore ⁠, so the token is never committed.
+`Secrets.xcconfig` is in `.gitignore`, so the token is never committed.
 
 ## Credits
 
