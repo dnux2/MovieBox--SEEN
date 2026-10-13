@@ -1,6 +1,5 @@
 import SwiftUI
 
-// أسماء التابات، عشان أقدر أنتقل لتاب من كود
 enum AppTab {
     case home, search, favorites
 }

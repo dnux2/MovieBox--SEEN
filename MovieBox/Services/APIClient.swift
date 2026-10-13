@@ -71,4 +71,27 @@ final class APIClient {
             throw APIError.decodingFailed
         }
     }
+
+    // تحميل بيانات الصورة (البوستر)، ولو فشل يعيد المحاولة 3 مرات
+    func loadImageData(from url: URL) async -> Data? {
+        // لو الصورة نزلت قبل، نرجعها على طول بدون طلب جديد
+        if let cached = Self.imageCache.object(forKey: url as NSURL) {
+            return cached as Data
+        }
+
+        for _ in 1...3 {
+            if Task.isCancelled { return nil }
+            do {
+                let (data, _) = try await session.data(from: url)
+                Self.imageCache.setObject(data as NSData, forKey: url as NSURL)
+                return data
+            } catch {
+                // مؤقت للتشخيص، أشيله بعدين
+                //print("Image failed:", url.lastPathComponent, error)
+            }
+            // ننتظر شوي قبل المحاولة الجاية
+            try? await Task.sleep(for: .milliseconds(500))
+        }
+        return nil
+    }
 }

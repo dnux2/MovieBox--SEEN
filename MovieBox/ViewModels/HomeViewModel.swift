@@ -19,7 +19,7 @@ final class HomeViewModel {
     var topRated = MovieSection()
 
     // أول 5 أفلام من الرائج، تطلع في الكارد الكبير
-    var featuredMovies: [Movie] { Array(trending.movies.prefix(5)) }
+    var featuredMovies: [Movie] { Array(trending.movies.dropFirst(10).prefix(5))}
 
     // لو السكشنات الثلاث فاضية وكلها فيها خطأ، أعرض خطأ واحد للشاشة كلها
     var allFailed: Bool {

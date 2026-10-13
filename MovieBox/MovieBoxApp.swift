@@ -11,17 +11,17 @@ struct MovieBoxApp: App {
                 MainTabView()
                     .environment(favorites)
 
-                if showSplash {
-                    SplashView()
-                        .transition(.opacity)
-                        .zIndex(1)
-                }
-            }
-            .task {
-                try? await Task.sleep(for: .seconds(1.8))
-                withAnimation(.easeInOut(duration: 0.4)) {
-                    showSplash = false
-                }
+//                if showSplash {
+//                    SplashView()
+//                        .transition(.opacity)
+//                        .zIndex(1)
+//                }
+//            }
+//            .task {
+//                try? await Task.sleep(for: .seconds(1))
+//                withAnimation(.easeInOut(duration: 0.4)) {
+//                    showSplash = false
+//                }
             }
         }
     }

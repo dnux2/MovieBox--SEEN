@@ -5,7 +5,8 @@ struct SplashView: View {
 
     var body: some View {
         ZStack {
-//AppBackground()
+            AppBackground()          // شلنا التعليق
+                .ignoresSafeArea()   // عشان تغطي الشاشة كلها
 
             VStack(spacing: 16) {
                 Image("logo")
@@ -14,8 +15,6 @@ struct SplashView: View {
                     .frame(width: 140, height: 140)
                     .clipShape(RoundedRectangle(cornerRadius: 28))
                     .scaleEffect(appeared ? 1 : 0.7)
-
-             
             }
             .opacity(appeared ? 1 : 0)
         }
