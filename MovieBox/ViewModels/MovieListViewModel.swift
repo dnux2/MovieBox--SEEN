@@ -46,14 +46,20 @@ final class MovieListViewModel {
 
     // ينادى من كل كارد، ويحمّل الصفحة الجاية بس لو هذا آخر فيلم
     func loadMoreIfNeeded(current movie: Movie) async {
+      //هل هذا اخر فلم بالصفحه
         guard movie.id == movies.last?.id,
+              //هل فيه صفحات باقي ماتحملت
               page < totalPages,
+              //هل في طلب شغال حاليا
               !isLoadingMore else { return }
 
         isLoadingMore = true
         do {
             let response = try await request(page: page + 1)
-            movies += response.results
+            // نضيف بس الأفلام اللي ما عندنا، عشان ما يتكرر نفس الـ id
+            let existingIDs = Set(movies.map(\.id))
+            movies += response.results.filter { !existingIDs.contains($0.id) }
+
             page += 1
         } catch {
             // فشل صفحة إضافية ما يمسح اللي عندي، بس ما أحمّل أكثر

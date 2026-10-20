@@ -19,6 +19,7 @@ struct HomeView: View {
         .toolbar(.hidden, for: .navigationBar)
         .task {
             // ما أحمّل من جديد لو عندي أفلام
+            //عشان لو رجعتي من صفحة التفاصيل ما يعيد التحميل من الصفر.
             if viewModel.trending.movies.isEmpty {
                 await viewModel.fetchAll()
             }
@@ -197,6 +198,9 @@ struct HomeView: View {
                             }
                     }
                     .buttonStyle(.plain)
+                    .task {
+                        await viewModel.loadMoreNowPlayingIfNeeded(current: movie)
+                    }
                 }
             }
             .padding(.horizontal, 20)
@@ -231,6 +235,7 @@ struct HomeView: View {
                         ForEach(viewModel.featuredMovies) { movie in
                             featuredCard(movie)
                                 // العرض هنا أصلاً بدون الهوامش، فما نطرح شي
+                            //يخلي عرض الكارد = عرض الشاشة (الحاوية)
                                 .containerRelativeFrame(.horizontal)
                                 // اللي بالنص كبير، واللي على الجنب أصغر وأخف
                                 .scrollTransition(.animated.threshold(.visible(0.9))) { content, phase in
@@ -245,6 +250,7 @@ struct HomeView: View {
                 }
                 // الهامش على الجهتين نفسه، فالكارد بالنص ويبان طرف اللي قبله واللي بعده
                 .contentMargins(.horizontal, 44, for: .scrollContent)
+               //السكرول يوقف دايم على كارد كامل (snap)
                 .scrollTargetBehavior(.viewAligned)
                 .scrollPosition(id: $featuredID)
 

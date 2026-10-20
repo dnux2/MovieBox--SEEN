@@ -13,7 +13,7 @@ final class APIClient {
     private let baseURL = "https://api.themoviedb.org/3"
     private let session: URLSession
     private let decoder: JSONDecoder
-    // why static لان كاش واحد لكل النسخ
+    // why static لان كاش واحد لكل النسخ                                                                                                
     private static let imageCache = NSCache<NSURL, NSData>()
 // why not private لسهوله الاختبار
     init(session: URLSession = .shared) {
@@ -84,7 +84,13 @@ final class APIClient {
         for _ in 1...3 {
             if Task.isCancelled { return nil }
             do {
-                let (data, _) = try await session.data(from: url)
+                let (data, response) = try await session.data(from: url)
+
+                // لو السيرفر ما رد بنجاح، ما أخزن شي وأعيد المحاولة
+                guard let http = response as? HTTPURLResponse,
+                      (200...299).contains(http.statusCode) else {
+                    continue
+                }
                 Self.imageCache.setObject(data as NSData, forKey: url as NSURL)
                 return data
             } catch {
