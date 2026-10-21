@@ -1,7 +1,6 @@
 import Foundation
-
-// هذا الكلاس الوحيد اللي يكلم URLSession في التطبيق كله
-// كل الشاشات تمر من هنا، ما أكرر الكود في كل مكان
+// This is the only class that talks to the TMDB API
+// Images are loaded by ImageLoader
 
 // why Class لان نوعه refrence type كل النسخ تاشر على كائن  واحد
 // الstruct نوعه value type فكل نسخه تسويلها نسخه
@@ -13,8 +12,6 @@ final class APIClient {
     private let baseURL = "https://api.themoviedb.org/3"
     private let session: URLSession
     private let decoder: JSONDecoder
-    // why static لان كاش واحد لكل النسخ                                                                                                
-    private static let imageCache = NSCache<NSURL, NSData>()
 // why not private لسهوله الاختبار
     init(session: URLSession = .shared) {
         self.session = session
@@ -74,32 +71,5 @@ final class APIClient {
         }
     }
 
-    // تحميل بيانات الصورة (البوستر)، ولو فشل يعيد المحاولة 3 مرات
-    func loadImageData(from url: URL) async -> Data? {
-        // لو الصورة نزلت قبل، نرجعها على طول بدون طلب جديد
-        if let cached = Self.imageCache.object(forKey: url as NSURL) {
-            return cached as Data
-        }
-
-        for _ in 1...3 {
-            if Task.isCancelled { return nil }
-            do {
-                let (data, response) = try await session.data(from: url)
-
-                // لو السيرفر ما رد بنجاح، ما أخزن شي وأعيد المحاولة
-                guard let http = response as? HTTPURLResponse,
-                      (200...299).contains(http.statusCode) else {
-                    continue
-                }
-                Self.imageCache.setObject(data as NSData, forKey: url as NSURL)
-                return data
-            } catch {
-                // مؤقت للتشخيص، أشيله بعدين
-                //print("Image failed:", url.lastPathComponent, error)
-            }
-            // ننتظر شوي قبل المحاولة الجاية
-            try? await Task.sleep(for: .milliseconds(500))
-        }
-        return nil
-    }
+  
 }

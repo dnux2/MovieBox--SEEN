@@ -3,9 +3,6 @@ import SwiftUI
 struct MovieCard: View {
     let movie: Movie
 
-    @State private var image: UIImage?
-    @State private var failed = false
-
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             poster
@@ -32,42 +29,17 @@ struct MovieCard: View {
     }
 
     // المكان ثابت 2:3 سواء نزلت الصورة أو لا، فالبطاقات كلها بنفس الحجم
+    // The poster itself is loaded by PosterImage
     private var poster: some View {
         Color(.tertiarySystemBackground)
             .aspectRatio(2/3, contentMode: .fit)
             .overlay {
-                if let image {
-                    Image(uiImage: image)
-                        .resizable()
-                        .scaledToFill()
-                } else if movie.posterURL == nil || failed {
-                    // الفيلم ما له بوستر أو فشل التحميل
-                    Image(systemName: "film")
-                        .font(.title)
-                        .foregroundStyle(.secondary)
-                } else {
-                    ProgressView()
-                }
+                PosterImage(url: movie.posterURL)
             }
             .clipped()
-            .task(id: movie.posterURL) {
-                await loadPoster()
-            }
-    }
-
-     // نطلب الصورة من APIClient، وهو اللي يعيد المحاولة 3 مرات
-    private func loadPoster() async {
-        guard let url = movie.posterURL else { return }
-        failed = false
-
-        if let data = await APIClient.shared.loadImageData(from: url),
-           let loaded = UIImage(data: data) {
-            image = loaded
-        } else if !Task.isCancelled {
-            failed = true
-        }
     }
 }
+
 #Preview {
     MovieCard(movie: Movie(
         id: 27205,

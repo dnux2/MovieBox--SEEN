@@ -32,7 +32,7 @@ struct PosterImage: View {
         guard let url else { return }
         failed = false
 
-        if let data = await APIClient.shared.loadImageData(from: url),
+        if let data = await ImageLoader.shared.loadImageData(from: url),
            let loaded = UIImage(data: data) {
             image = loaded
         } else if !Task.isCancelled {
