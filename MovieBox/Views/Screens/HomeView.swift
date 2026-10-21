@@ -1,8 +1,11 @@
 import SwiftUI
+import SwiftData
 
 struct HomeView: View {
 
     @State private var viewModel = HomeViewModel()
+    // The storage context that SwiftData gives to the views
+    @Environment(\.modelContext) private var modelContext
     @Environment(FavoritesStore.self) private var favorites
 
     // أي فيلم في النص من الكارد الكبير، للنقاط
@@ -18,6 +21,8 @@ struct HomeView: View {
         .background { AppBackground() }
         .toolbar(.hidden, for: .navigationBar)
         .task {
+            // Gives the ViewModel access to the storage
+            viewModel.setUp(context: modelContext)
             // ما أحمّل من جديد لو عندي أفلام
             //عشان لو رجعتي من صفحة التفاصيل ما يعيد التحميل من الصفر.
             if viewModel.trending.movies.isEmpty {
@@ -132,19 +137,7 @@ struct HomeView: View {
         Color(.tertiarySystemBackground)
             .frame(width: width, height: height)
             .overlay {
-                if movie.posterURL == nil {
-                    Image(systemName: "film").foregroundStyle(.secondary)
-                } else {
-                    AsyncImage(url: movie.posterURL) { phase in
-                        if let image = phase.image {
-                            image.resizable().scaledToFill()
-                        } else if phase.error != nil {
-                            Image(systemName: "film").foregroundStyle(.secondary)
-                        } else {
-                            ProgressView()
-                        }
-                    }
-                }
+                PosterImage(url: movie.posterURL)
             }
             .clipShape(RoundedRectangle(cornerRadius: 14))
     }
@@ -219,8 +212,6 @@ struct HomeView: View {
             }
         }
         .padding(.horizontal, 20)
-        
-
     }
 
 
@@ -279,19 +270,7 @@ struct HomeView: View {
         Color(.tertiarySystemBackground)
             .aspectRatio(2/3, contentMode: .fit)
             .overlay {
-                AsyncImage(url: movie.largePosterURL) { phase in
-                    if let image = phase.image {
-                        image
-                            .resizable()
-                            .scaledToFill()
-                    } else if phase.error != nil {
-                        Image(systemName: "film")
-                            .font(.largeTitle)
-                            .foregroundStyle(.secondary)
-                    } else {
-                        ProgressView()
-                    }
-                }
+                PosterImage(url: movie.largePosterURL)
             }
             .overlay(alignment: .bottomLeading) {
                 featuredInfo(movie)

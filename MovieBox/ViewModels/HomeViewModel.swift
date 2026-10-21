@@ -1,6 +1,6 @@
 import Foundation
 import Observation
-
+import SwiftData
 // حالة سكشن واحد: أفلامه وهل يحمّل وهل فيه خطأ
 struct MovieSection {
     var movies: [Movie] = []
@@ -35,6 +35,17 @@ final class HomeViewModel {
             $0.movies.isEmpty && $0.errorMessage != nil
         }
     }
+    
+    private var cache: MovieCache?
+
+    
+    // Gives the ViewModel access to the storage
+    func setUp(context: ModelContext) {
+        // نسوي الكاش مرة وحدة بس
+        if cache == nil {
+            cache = MovieCache(context: context)
+        }
+    }
 
     // تنادى أول مرة ومع السحب للتحديث ومع زر Try again
     func fetchAll() async {
@@ -50,7 +61,11 @@ final class HomeViewModel {
         trending = await t
         nowPlaying = await n
         topRated = await r
-
+        
+        // Saves the new data, or falls back to the saved data
+        saveToCache()
+        fillFromCache()
+        
         // نرجع للصفحة الأولى بس لو التحديث نجح
         if nowPlaying.errorMessage == nil {
             nowPlayingPage = 1
@@ -74,6 +89,31 @@ final class HomeViewModel {
             // فشل صفحة إضافية ما يمسح اللي عندي
         }
         isLoadingMoreNowPlaying = false
+    }
+    // Saves the sections that loaded successfully
+    private func saveToCache() {
+        if trending.errorMessage == nil {
+            cache?.save(trending.movies, section: "trending")
+        }
+        if nowPlaying.errorMessage == nil {
+            cache?.save(nowPlaying.movies, section: "nowPlaying")
+        }
+        if topRated.errorMessage == nil {
+            cache?.save(topRated.movies, section: "topRated")
+        }
+    }
+
+    // If a section failed and is empty, shows the saved movies instead
+    private func fillFromCache() {
+        if trending.errorMessage != nil && trending.movies.isEmpty {
+            trending.movies = cache?.load(section: "trending") ?? []
+        }
+        if nowPlaying.errorMessage != nil && nowPlaying.movies.isEmpty {
+            nowPlaying.movies = cache?.load(section: "nowPlaying") ?? []
+        }
+        if topRated.errorMessage != nil && topRated.movies.isEmpty {
+            topRated.movies = cache?.load(section: "topRated") ?? []
+        }
     }
 
     // الـ spinner بس لو السكشن فاضي، عشان السحب ما يخفي الأفلام

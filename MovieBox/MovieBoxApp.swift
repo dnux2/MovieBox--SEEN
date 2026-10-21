@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 @main
 struct MovieBoxApp: App {
@@ -23,6 +24,9 @@ struct MovieBoxApp: App {
 //                    showSplash = false
 //                }
             }
-        }
+            
+        }.modelContainer(for: CachedMovie.self)
+        // Creates the storage for CachedMovie and shares it with the whole app
+
     }
 }
