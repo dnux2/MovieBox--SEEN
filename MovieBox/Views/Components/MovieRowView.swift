@@ -6,21 +6,11 @@ struct MovieRowView: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            AsyncImage(url: movie.posterURL) { phase in
-                if let image = phase.image {
-                    image
-                        .resizable()
-                        .scaledToFill()
-                } else if phase.error != nil {
-                    Image(systemName: "film")
-                        .foregroundStyle(.secondary)
-                } else {
-                    ProgressView()
-                }
-            }
-            .frame(width: 60, height: 90)
-            .background(Color(.tertiarySystemBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 8))
+            // PosterImage يتولى الصورة والأيقونة والتحميل بنفسه
+            PosterImage(url: movie.posterURL)
+                .frame(width: 60, height: 90)
+                .background(Color(.tertiarySystemBackground))
+                .clipShape(RoundedRectangle(cornerRadius: 8))
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(movie.title)

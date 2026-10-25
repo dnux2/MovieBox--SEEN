@@ -43,21 +43,9 @@ struct MovieDetailView: View {
 
     private var backdrop: some View {
         GeometryReader { geo in
-            AsyncImage(url: movie.largePosterURL) { phase in
-                if let image = phase.image {
-                    image
-                        .resizable()
-                        .scaledToFill()
-                } else if phase.error != nil {
-                    Image(systemName: "film")
-                        .font(.largeTitle)
-                        .foregroundStyle(.secondary)
-                } else {
-                    ProgressView()
-                }
-            }
-            .frame(width: geo.size.width, height: geo.size.height)
-            .clipped()
+            PosterImage(url: movie.largePosterURL)
+                .frame(width: geo.size.width, height: geo.size.height)
+                .clipped()
         }
         .background(Color.black)
         // تدرج أسود يغمّق الأسفل عشان النص يتقرا

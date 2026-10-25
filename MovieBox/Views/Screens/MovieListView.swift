@@ -1,8 +1,11 @@
 import SwiftUI
+import SwiftData
 
 struct MovieListView: View {
 
     @State private var viewModel: MovieListViewModel
+    @Environment(\.modelContext) private var modelContext
+
     private let columns = [GridItem(.flexible()), GridItem(.flexible())]
 
     init(kind: MovieListKind) {
@@ -15,6 +18,8 @@ struct MovieListView: View {
             .navigationTitle(viewModel.kind.rawValue)
             .navigationBarTitleDisplayMode(.inline)
             .task {
+                // لازم قبل fetchFirstPage، عشان الكاش يكون جاهز
+                viewModel.setUp(context: modelContext)
                 if viewModel.movies.isEmpty {
                     await viewModel.fetchFirstPage()
                 }
@@ -66,6 +71,5 @@ struct MovieListView: View {
         MovieListView(kind: .topRated)
     }
     .environment(FavoritesStore())
+    .modelContainer(for: CachedMovie.self, inMemory: true)
 }
-
-

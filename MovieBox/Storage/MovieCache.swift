@@ -37,7 +37,9 @@ final class MovieCache{
    
     
     private func fetchCached(section: String) -> [CachedMovie] {
+        //يحدد نوع البيانات الي اجيبها
         let descriptor = FetchDescriptor<CachedMovie>(
+            //يفلترها بشرط فاعرف الفرق بين كاش الهوم وكاش السي ال
             predicate: #Predicate{$0.section == section})
         return (try? context.fetch(descriptor)) ?? []
 
