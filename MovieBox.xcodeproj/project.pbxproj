@@ -6,10 +6,6 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		AAAC431E306BCEA30031EEF0 /* Secrets.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = AAAC431D306BCEA30031EEF0 /* Secrets.xcconfig */; };
-/* End PBXBuildFile section */
-
 /* Begin PBXFileReference section */
 		AAAC430A306BBE960031EEF0 /* MovieBox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MovieBox.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AAAC431D306BCEA30031EEF0 /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
@@ -128,7 +124,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AAAC431E306BCEA30031EEF0 /* Secrets.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

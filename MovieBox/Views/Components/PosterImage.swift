@@ -6,7 +6,7 @@ struct PosterImage: View {
 
     @State private var image: UIImage?
     @State private var failed = false
-
+    @Environment(\.scenePhase) private var scenePhase
     var body: some View {
         ZStack {
             if let image {
@@ -21,13 +21,18 @@ struct PosterImage: View {
                 ProgressView()
             }
         }
-        // يشتغل كل ما تظهر الصورة، فلو فشلت قبل يعيد المحاولة
+        // يشتغل لما الصورة تظهر أو يتغير الرابط
         .task(id: url) {
             await load()
+        }        // لما التطبيق يرجع للواجهة ولسا الصورة فاشلة، نعيد المحاولة
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .active && failed {
+                Task { await load() }
+            }
         }
     }
 
-    // Asks APIClient for the image data and turns it into a UIImage
+    // Asks ImageLoader for the image data and turns it into a UIImage
     private func load() async {
         guard let url else { return }
         failed = false
